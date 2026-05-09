@@ -1760,45 +1760,75 @@ function closeRulesModal() {
 }
 
 // MULTIPLAYER LOGIC
-let socket;
-let currentRoomCode = null;
+const firebaseConfig = {
+    apiKey: "AIzaSyCPir74hZq4ZOu1nPXz8bSgKzSzztC65Ao",
+    authDomain: "game-53f85.firebaseapp.com",
+    projectId: "game-53f85",
+    storageBucket: "game-53f85.firebasestorage.app",
+    messagingSenderId: "671149285789",
+    appId: "1:671149285789:web:f686bc284d643c93d60f74",
+    measurementId: "G-HZQBMXKKXT",
+    databaseURL: "https://game-53f85-default-rtdb.firebaseio.com/" // Default RTDB URL
+};
 
+// Initialize Firebase
+let db;
 try {
-    // Connect to the Socket.io server
-    socket = io();
-    
-    socket.on('roomCreated', ({ roomCode, roomData }) => {
-        currentRoomCode = roomCode;
-        document.getElementById('multi-create-panel').classList.add('hidden');
-        document.getElementById('multi-lobby-panel').classList.remove('hidden');
-        document.getElementById('lobby-room-code').textContent = 'CODE: ' + roomCode;
-        document.getElementById('lobby-game-type').textContent = getGameName(roomData.gameType);
-        document.getElementById('lobby-credits').textContent = roomData.credits;
-        updateLobbyPlayers(roomData.players, roomData.maxPlayers);
-    });
-
-    socket.on('roomJoined', ({ roomCode, roomData }) => {
-        currentRoomCode = roomCode;
-        document.getElementById('multi-join-panel').classList.add('hidden');
-        document.getElementById('multi-lobby-panel').classList.remove('hidden');
-        document.getElementById('lobby-room-code').textContent = 'CODE: ' + roomCode;
-        document.getElementById('lobby-game-type').textContent = getGameName(roomData.gameType);
-        document.getElementById('lobby-credits').textContent = roomData.credits;
-        updateLobbyPlayers(roomData.players, roomData.maxPlayers);
-    });
-
-    socket.on('updatePlayerList', (players) => {
-        // Find maxPlayers from the display or store it
-        const max = document.getElementById('lobby-players').textContent.split(' / ')[1] || '?';
-        updateLobbyPlayers(players, max);
-    });
-
-    socket.on('errorMsg', (msg) => {
-        alert(msg);
-    });
-
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
 } catch (e) {
-    console.warn("Socket.io not loaded or server unreachable. Multiplayer will be limited.");
+    console.warn("Firebase initialization failed. Check your config.");
+}
+
+let currentRoomCode = null;
+let myPlayerRef = null;
+let roomListener = null;
+
+function setupRoomListener(roomCode) {
+    if (roomListener) db.ref('rooms/' + currentRoomCode).off();
+    
+    roomListener = db.ref('rooms/' + roomCode).on('value', (snapshot) => {
+        const roomData = snapshot.val();
+        if (!roomData) {
+            if (currentRoomCode === roomCode) {
+                alert("방이 사라졌거나 종료되었습니다.");
+                hideMultiPanels();
+            }
+            return;
+        }
+
+        document.getElementById('lobby-room-code').textContent = 'CODE: ' + roomCode;
+        document.getElementById('lobby-game-type').textContent = getGameName(roomData.gameType);
+        document.getElementById('lobby-credits').textContent = roomData.credits;
+        
+        const players = [];
+        if (roomData.players) {
+            Object.keys(roomData.players).forEach(key => {
+                players.push({ ...roomData.players[key], id: key });
+            });
+        }
+        
+        updateLobbyPlayers(players, roomData.maxPlayers);
+    });
+}
+
+function updateLobbyPlayers(players, max) {
+    document.getElementById('lobby-players').textContent = `${players.length} / ${max}`;
+    const playerList = document.getElementById('lobby-player-list');
+    playerList.innerHTML = '';
+    players.forEach(p => {
+        const isMe = p.id === myPlayerRef.key;
+        const li = document.createElement('li');
+        li.style.marginBottom = '5px';
+        if (p.isHost) {
+            li.style.color = 'var(--accent-blue)';
+            li.innerHTML = `👑 <strong>${p.nickname}</strong> (호스트${isMe ? '/나' : ''})`;
+        } else {
+            li.style.color = isMe ? 'var(--accent-pink)' : 'white';
+            li.innerHTML = `${isMe ? '👋' : '👤'} <strong>${p.nickname}</strong> ${isMe ? '(나)' : ''}`;
+        }
+        playerList.appendChild(li);
+    });
 }
 
 function getGameName(type) {
@@ -1813,25 +1843,6 @@ function getGameName(type) {
     return names[type] || type;
 }
 
-function updateLobbyPlayers(players, max) {
-    document.getElementById('lobby-players').textContent = `${players.length} / ${max}`;
-    const playerList = document.getElementById('lobby-player-list');
-    playerList.innerHTML = '';
-    players.forEach(p => {
-        const isMe = p.id === socket.id;
-        const li = document.createElement('li');
-        li.style.marginBottom = '5px';
-        if (p.isHost) {
-            li.style.color = 'var(--accent-blue)';
-            li.innerHTML = `👑 <strong>${p.nickname}</strong> (호스트${isMe ? '/나' : ''})`;
-        } else {
-            li.style.color = isMe ? 'var(--accent-pink)' : 'white';
-            li.innerHTML = `${isMe ? '👋' : '👤'} <strong>${p.nickname}</strong> ${isMe ? '(나)' : ''}`;
-        }
-        playerList.appendChild(li);
-    });
-}
-
 function showMultiCreate() {
     document.getElementById('multi-options').classList.add('hidden');
     document.getElementById('multi-create-panel').classList.remove('hidden');
@@ -1843,8 +1854,9 @@ function showMultiJoin() {
 }
 
 function hideMultiPanels() {
-    if (currentRoomCode && socket && socket.connected) {
-        socket.emit('leaveRoom', currentRoomCode);
+    if (currentRoomCode) {
+        if (myPlayerRef) myPlayerRef.remove();
+        db.ref('rooms/' + currentRoomCode).off();
         currentRoomCode = null;
     }
     document.getElementById('multi-create-panel').classList.add('hidden');
@@ -1859,11 +1871,26 @@ function createRoom() {
     const maxPlayers = document.getElementById('room-players').value;
     const nickname = document.getElementById('create-nickname').value.trim() || 'HostPlayer';
     
-    if (socket && socket.connected) {
-        socket.emit('createRoom', { nickname, gameType, credits, maxPlayers });
-    } else {
-        alert("서버에 연결되지 않았습니다. (Demo Mode)");
-    }
+    const roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+    currentRoomCode = roomCode;
+    const roomRef = db.ref('rooms/' + roomCode);
+    
+    roomRef.set({
+        gameType,
+        credits,
+        maxPlayers,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+        myPlayerRef = roomRef.child('players').push();
+        myPlayerRef.set({
+            nickname,
+            isHost: true
+        });
+        
+        document.getElementById('multi-create-panel').classList.add('hidden');
+        document.getElementById('multi-lobby-panel').classList.remove('hidden');
+        setupRoomListener(roomCode);
+    });
 }
 
 function joinRoom() {
@@ -1875,11 +1902,30 @@ function joinRoom() {
         return;
     }
     
-    if (socket && socket.connected) {
-        socket.emit('joinRoom', { nickname, roomCode });
-    } else {
-        alert("서버에 연결되지 않았습니다.");
-    }
+    db.ref('rooms/' + roomCode).once('value', (snapshot) => {
+        const roomData = snapshot.val();
+        if (!roomData) {
+            alert("방을 찾을 수 없습니다.");
+            return;
+        }
+
+        const playerCount = roomData.players ? Object.keys(roomData.players).length : 0;
+        if (playerCount >= roomData.maxPlayers) {
+            alert("방이 가득 찼습니다.");
+            return;
+        }
+
+        currentRoomCode = roomCode;
+        myPlayerRef = db.ref('rooms/' + roomCode + '/players').push();
+        myPlayerRef.set({
+            nickname,
+            isHost: false
+        });
+
+        document.getElementById('multi-join-panel').classList.add('hidden');
+        document.getElementById('multi-lobby-panel').classList.remove('hidden');
+        setupRoomListener(roomCode);
+    });
 }
 
 // Close modal when clicking outside of it
