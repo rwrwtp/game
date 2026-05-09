@@ -1760,6 +1760,78 @@ function closeRulesModal() {
 }
 
 // MULTIPLAYER LOGIC
+let socket;
+let currentRoomCode = null;
+
+try {
+    // Connect to the Socket.io server
+    socket = io();
+    
+    socket.on('roomCreated', ({ roomCode, roomData }) => {
+        currentRoomCode = roomCode;
+        document.getElementById('multi-create-panel').classList.add('hidden');
+        document.getElementById('multi-lobby-panel').classList.remove('hidden');
+        document.getElementById('lobby-room-code').textContent = 'CODE: ' + roomCode;
+        document.getElementById('lobby-game-type').textContent = getGameName(roomData.gameType);
+        document.getElementById('lobby-credits').textContent = roomData.credits;
+        updateLobbyPlayers(roomData.players, roomData.maxPlayers);
+    });
+
+    socket.on('roomJoined', ({ roomCode, roomData }) => {
+        currentRoomCode = roomCode;
+        document.getElementById('multi-join-panel').classList.add('hidden');
+        document.getElementById('multi-lobby-panel').classList.remove('hidden');
+        document.getElementById('lobby-room-code').textContent = 'CODE: ' + roomCode;
+        document.getElementById('lobby-game-type').textContent = getGameName(roomData.gameType);
+        document.getElementById('lobby-credits').textContent = roomData.credits;
+        updateLobbyPlayers(roomData.players, roomData.maxPlayers);
+    });
+
+    socket.on('updatePlayerList', (players) => {
+        // Find maxPlayers from the display or store it
+        const max = document.getElementById('lobby-players').textContent.split(' / ')[1] || '?';
+        updateLobbyPlayers(players, max);
+    });
+
+    socket.on('errorMsg', (msg) => {
+        alert(msg);
+    });
+
+} catch (e) {
+    console.warn("Socket.io not loaded or server unreachable. Multiplayer will be limited.");
+}
+
+function getGameName(type) {
+    const names = {
+        holdem: '텍사스 홀덤',
+        seotda: '섯다 (2장)',
+        seotda3: '섯다 (3장)',
+        gostop: '고스톱',
+        blackjack: '블랙잭',
+        poker: '비디오 포커'
+    };
+    return names[type] || type;
+}
+
+function updateLobbyPlayers(players, max) {
+    document.getElementById('lobby-players').textContent = `${players.length} / ${max}`;
+    const playerList = document.getElementById('lobby-player-list');
+    playerList.innerHTML = '';
+    players.forEach(p => {
+        const isMe = p.id === socket.id;
+        const li = document.createElement('li');
+        li.style.marginBottom = '5px';
+        if (p.isHost) {
+            li.style.color = 'var(--accent-blue)';
+            li.innerHTML = `👑 <strong>${p.nickname}</strong> (호스트${isMe ? '/나' : ''})`;
+        } else {
+            li.style.color = isMe ? 'var(--accent-pink)' : 'white';
+            li.innerHTML = `${isMe ? '👋' : '👤'} <strong>${p.nickname}</strong> ${isMe ? '(나)' : ''}`;
+        }
+        playerList.appendChild(li);
+    });
+}
+
 function showMultiCreate() {
     document.getElementById('multi-options').classList.add('hidden');
     document.getElementById('multi-create-panel').classList.remove('hidden');
@@ -1771,6 +1843,10 @@ function showMultiJoin() {
 }
 
 function hideMultiPanels() {
+    if (currentRoomCode && socket && socket.connected) {
+        socket.emit('leaveRoom', currentRoomCode);
+        currentRoomCode = null;
+    }
     document.getElementById('multi-create-panel').classList.add('hidden');
     document.getElementById('multi-join-panel').classList.add('hidden');
     document.getElementById('multi-lobby-panel').classList.add('hidden');
@@ -1778,51 +1854,32 @@ function hideMultiPanels() {
 }
 
 function createRoom() {
-    const gameType = document.getElementById('room-game-type');
+    const gameType = document.getElementById('room-game-type').value;
     const credits = document.getElementById('room-credits').value;
-    const players = document.getElementById('room-players').value;
-    const gameName = gameType.options[gameType.selectedIndex].text;
+    const maxPlayers = document.getElementById('room-players').value;
     const nickname = document.getElementById('create-nickname').value.trim() || 'HostPlayer';
     
-    // Generate a random 4 letter code
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for(let i=0; i<4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-    
-    document.getElementById('multi-create-panel').classList.add('hidden');
-    document.getElementById('multi-lobby-panel').classList.remove('hidden');
-    
-    document.getElementById('lobby-room-code').textContent = 'CODE: ' + code;
-    document.getElementById('lobby-game-type').textContent = gameName;
-    document.getElementById('lobby-credits').textContent = credits;
-    document.getElementById('lobby-players').textContent = `1 / ${players}`;
-
-    const playerList = document.getElementById('lobby-player-list');
-    playerList.innerHTML = `<li style="margin-bottom: 5px; color: var(--accent-blue);">👑 <strong>${nickname}</strong> (호스트/나)</li>`;
+    if (socket && socket.connected) {
+        socket.emit('createRoom', { nickname, gameType, credits, maxPlayers });
+    } else {
+        alert("서버에 연결되지 않았습니다. (Demo Mode)");
+    }
 }
 
 function joinRoom() {
-    const code = document.getElementById('room-code-input').value.trim().toUpperCase();
+    const roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
     const nickname = document.getElementById('join-nickname').value.trim() || 'GuestPlayer';
 
-    if (code.length === 0) {
+    if (roomCode.length === 0) {
         alert("올바른 방 코드를 입력해주세요.");
         return;
     }
     
-    document.getElementById('multi-join-panel').classList.add('hidden');
-    document.getElementById('multi-lobby-panel').classList.remove('hidden');
-    
-    document.getElementById('lobby-room-code').textContent = 'CODE: ' + code;
-    document.getElementById('lobby-game-type').textContent = "호스트 설정 대기중";
-    document.getElementById('lobby-credits').textContent = "-";
-    document.getElementById('lobby-players').textContent = "참가 완료";
-
-    const playerList = document.getElementById('lobby-player-list');
-    playerList.innerHTML = `
-        <li style="margin-bottom: 5px;">👑 <strong>HostPlayer</strong> (호스트)</li>
-        <li style="margin-bottom: 5px; color: var(--accent-pink);">👋 <strong>${nickname}</strong> (나)</li>
-    `;
+    if (socket && socket.connected) {
+        socket.emit('joinRoom', { nickname, roomCode });
+    } else {
+        alert("서버에 연결되지 않았습니다.");
+    }
 }
 
 // Close modal when clicking outside of it
