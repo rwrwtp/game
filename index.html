@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Casino</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Rules Modal -->
+    <div id="rules-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeRulesModal()">&times;</span>
+            <h2 class="glow-title" id="rules-modal-title" style="font-size: 2rem; margin-bottom: 20px;">게임 족보</h2>
+            
+            <div id="rules-poker" class="rules-section hidden">
+                <h3>🃏 포커 & 텍사스 홀덤</h3>
+                <ul class="rules-list">
+                    <li><span class="rank-name">로열 플러시</span> <span class="rank-desc">A, K, Q, J, 10이 모두 같은 무늬</span></li>
+                    <li><span class="rank-name">스트레이트 플러시</span> <span class="rank-desc">연속된 숫자 5장이 모두 같은 무늬</span></li>
+                    <li><span class="rank-name">포카드</span> <span class="rank-desc">같은 숫자 4장</span></li>
+                    <li><span class="rank-name">풀하우스</span> <span class="rank-desc">같은 숫자 3장 + 2장</span></li>
+                    <li><span class="rank-name">플러시</span> <span class="rank-desc">무늬가 같은 카드 5장</span></li>
+                    <li><span class="rank-name">스트레이트</span> <span class="rank-desc">무늬 상관없이 연속된 숫자 5장</span></li>
+                    <li><span class="rank-name">트리플</span> <span class="rank-desc">같은 숫자 3장</span></li>
+                    <li><span class="rank-name">투페어</span> <span class="rank-desc">같은 숫자 2장씩 2쌍</span></li>
+                    <li><span class="rank-name">원페어</span> <span class="rank-desc">같은 숫자 2장 1쌍</span></li>
+                </ul>
+            </div>
+
+            <div id="rules-seotda" class="rules-section hidden">
+                <h3>🎴 섯다</h3>
+                <ul class="rules-list">
+                    <li><span class="rank-name">38 광땡</span> <span class="rank-desc">3광 + 8광 (최강 족보)</span></li>
+                    <li><span class="rank-name">18, 13 광땡</span> <span class="rank-desc">1광+8광 또는 1광+3광</span></li>
+                    <li><span class="rank-name">장땡~1땡</span> <span class="rank-desc">같은 월 2장 (10월 두 장 = 장땡)</span></li>
+                    <li><span class="rank-name">알리</span> <span class="rank-desc">1월 + 2월</span></li>
+                    <li><span class="rank-name">독사</span> <span class="rank-desc">1월 + 4월</span></li>
+                    <li><span class="rank-name">구삥</span> <span class="rank-desc">9월 + 1월</span></li>
+                    <li><span class="rank-name">장사</span> <span class="rank-desc">4월 + 10월</span></li>
+                    <li><span class="rank-name">세륙</span> <span class="rank-desc">4월 + 6월</span></li>
+                    <li><span class="rank-name">갑오</span> <span class="rank-desc">월 합의 일의 자리가 9</span></li>
+                    <li><span class="rank-name">끗</span> <span class="rank-desc">합의 일의 자리가 1~8</span></li>
+                    <li><span class="rank-name">망통</span> <span class="rank-desc">합의 일의 자리가 0</span></li>
+                </ul>
+            </div>
+
+            <div id="rules-blackjack" class="rules-section hidden">
+                <h3>♠️ 블랙잭</h3>
+                <ul class="rules-list">
+                    <li><span class="rank-name">목표</span> <span class="rank-desc">카드 합이 21에 가장 가깝게 만들기</span></li>
+                    <li><span class="rank-name">블랙잭</span> <span class="rank-desc">A + 10, J, Q, K (21점). 1.5배 상금</span></li>
+                    <li><span class="rank-name">버스트 (Bust)</span> <span class="rank-desc">카드 합이 21을 초과하면 즉시 패배</span></li>
+                    <li><span class="rank-name">딜러 규칙</span> <span class="rank-desc">16점 이하는 무조건 히트, 17점 이상은 스탠드</span></li>
+                    <li><span class="rank-name">히트 (HIT)</span> <span class="rank-desc">카드를 1장 더 받습니다</span></li>
+                    <li><span class="rank-name">스탠드 (STAND)</span> <span class="rank-desc">카드를 그만 받고 차례를 넘깁니다</span></li>
+                </ul>
+            </div>
+
+            <div id="rules-gostop" class="rules-section hidden">
+                <h3>🎴 고스톱</h3>
+                <ul class="rules-list">
+                    <li><span class="rank-name">목표</span> <span class="rank-desc">바닥 패와 같은 월을 매칭하여 먼저 3점 달성</span></li>
+                    <li><span class="rank-name">광 (Kwang)</span> <span class="rank-desc">3장 3점, 4장 4점, 5장 15점</span></li>
+                    <li><span class="rank-name">열끗 (Yul) & 띠 (Dan)</span> <span class="rank-desc">5장 1점, 이후 1장마다 1점 추가</span></li>
+                    <li><span class="rank-name">피 (Pi)</span> <span class="rank-desc">10장 1점, 이후 1장마다 1점 추가</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODE MENU (Top Level) -->
+    <div id="main-menu" class="menu-container">
+        <div class="menu-content">
+            <h1 class="glow-title">NEON CASINO</h1>
+            <p class="subtitle">모드 선택</p>
+            <div class="game-list">
+                <div class="game-card" onclick="openMode('single')">
+                    <div class="game-icon">👤</div>
+                    <h2>싱글 플레이</h2>
+                    <p>AI와 대결</p>
+                </div>
+                <div class="game-card" onclick="openMode('multi')">
+                    <div class="game-icon">👥</div>
+                    <h2>멀티 플레이</h2>
+                    <p>친구와 대결</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME MENU (Single Player Games) -->
+    <div id="game-menu" class="menu-container hidden">
+        <div class="menu-content">
+            <div class="header-left" style="justify-content: center; margin-bottom: 20px;">
+                <button class="btn btn-back" onclick="openMainMenu()">← 뒤로가기</button>
+            </div>
+            <h1 class="glow-title">싱글 플레이</h1>
+            <p class="subtitle">게임을 선택하세요</p>
+            <div class="game-list">
+                <div class="game-card" onclick="openGame('video-poker')">
+                    <div class="game-icon">🃏</div>
+                    <h2>포커</h2>
+                    <p>잭스 오어 베터</p>
+                </div>
+                <div class="game-card" onclick="openGame('blackjack')">
+                    <div class="game-icon">♠️</div>
+                    <h2>블랙잭</h2>
+                    <p>딜러를 이겨라</p>
+                </div>
+                <div class="game-card" onclick="openGame('gostop')">
+                    <div class="game-icon">🎴</div>
+                    <h2>고스톱</h2>
+                    <p>화투 짝맞추기</p>
+                </div>
+                <div class="game-card" onclick="openGame('seotda')">
+                    <div class="game-icon">🎴</div>
+                    <h2>섯다 (2장)</h2>
+                    <p>화투 두 장 승부</p>
+                </div>
+                <div class="game-card" onclick="openGame('seotda3')">
+                    <div class="game-icon">🎴</div>
+                    <h2>섯다 (3장)</h2>
+                    <p>3장 중 2장 선택</p>
+                </div>
+                <div class="game-card" onclick="openGame('holdem')">
+                    <div class="game-icon">🃏</div>
+                    <h2>텍사스 홀덤</h2>
+                    <p>노 리밋 vs AI</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MULTIPLAYER MENU -->
+    <div id="multi-menu" class="menu-container hidden">
+        <div class="menu-content" style="max-width: 600px;">
+            <div class="header-left" style="justify-content: center; margin-bottom: 20px;">
+                <button class="btn btn-back" onclick="openMainMenu()">← 뒤로가기</button>
+            </div>
+            <h1 class="glow-title">멀티 플레이</h1>
+            
+            <div class="multi-options" id="multi-options">
+                <div class="game-list" style="margin-top: 20px;">
+                    <div class="game-card" onclick="showMultiCreate()">
+                        <div class="game-icon">🏠</div>
+                        <h2>방 만들기</h2>
+                        <p>호스트가 되어 설정</p>
+                    </div>
+                    <div class="game-card" onclick="showMultiJoin()">
+                        <div class="game-icon">🔑</div>
+                        <h2>방 참가하기</h2>
+                        <p>코드를 입력해 접속</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Room Panel -->
+            <div id="multi-create-panel" class="hidden" style="text-align: left; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; border: 1px solid var(--accent-blue); margin-top: 20px;">
+                <h2 style="color: var(--accent-blue); margin-bottom: 20px; text-align: center;">방 만들기 설정</h2>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: var(--text-muted); margin-bottom: 5px;">닉네임 (호스트)</label>
+                    <input type="text" id="create-nickname" placeholder="내 닉네임" value="HostPlayer" style="width: 100%; padding: 10px; background: #111; color: white; border: 1px solid #333; border-radius: 6px; font-family: inherit; font-size: 1rem;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: var(--text-muted); margin-bottom: 5px;">게임 종류</label>
+                    <select id="room-game-type" style="width: 100%; padding: 10px; background: #111; color: white; border: 1px solid #333; border-radius: 6px; font-family: inherit; font-size: 1rem;">
+                        <option value="holdem">텍사스 홀덤</option>
+                        <option value="seotda">섯다 (2장)</option>
+                        <option value="seotda3">섯다 (3장)</option>
+                        <option value="gostop">고스톱</option>
+                        <option value="blackjack">블랙잭</option>
+                        <option value="poker">비디오 포커</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: var(--text-muted); margin-bottom: 5px;">초기 크레딧</label>
+                    <input type="number" id="room-credits" value="1000" min="100" step="100" style="width: 100%; padding: 10px; background: #111; color: white; border: 1px solid #333; border-radius: 6px; font-family: inherit; font-size: 1rem;">
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: var(--text-muted); margin-bottom: 5px;">인원 수</label>
+                    <select id="room-players" style="width: 100%; padding: 10px; background: #111; color: white; border: 1px solid #333; border-radius: 6px; font-family: inherit; font-size: 1rem;">
+                        <option value="2">2명</option>
+                        <option value="3">3명</option>
+                        <option value="4">4명</option>
+                        <option value="5">5명</option>
+                        <option value="6">6명</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="hideMultiPanels()" style="flex: 1;">취소</button>
+                    <button class="btn btn-primary" onclick="createRoom()" style="flex: 1;">방 생성</button>
+                </div>
+            </div>
+
+            <!-- Join Room Panel -->
+            <div id="multi-join-panel" class="hidden" style="text-align: left; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; border: 1px solid var(--accent-pink); margin-top: 20px;">
+                <h2 style="color: var(--accent-pink); margin-bottom: 20px; text-align: center;">방 참가하기</h2>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: var(--text-muted); margin-bottom: 5px;">닉네임</label>
+                    <input type="text" id="join-nickname" placeholder="내 닉네임" value="GuestPlayer" style="width: 100%; padding: 10px; background: #111; color: white; border: 1px solid #333; border-radius: 6px; font-family: inherit; font-size: 1rem;">
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: var(--text-muted); margin-bottom: 5px;">방 코드 입력</label>
+                    <input type="text" id="room-code-input" placeholder="예: A1B2C" style="width: 100%; padding: 10px; background: #111; color: white; border: 1px solid #333; border-radius: 6px; font-family: inherit; font-size: 1rem; text-transform: uppercase;">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="hideMultiPanels()" style="flex: 1;">취소</button>
+                    <button class="btn btn-primary" onclick="joinRoom()" style="flex: 1;">접속</button>
+                </div>
+            </div>
+            
+            <!-- Waiting Room (Lobby) -->
+            <div id="multi-lobby-panel" class="hidden" style="text-align: center; background: rgba(0,0,0,0.5); padding: 30px; border-radius: 12px; border: 1px solid var(--accent-gold); margin-top: 20px;">
+                <h2 style="color: var(--accent-gold); margin-bottom: 10px;">대기실</h2>
+                <h3 id="lobby-room-code" style="letter-spacing: 3px; font-size: 1.5rem; margin-bottom: 20px;">CODE: </h3>
+                
+                <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left;">
+                    <p style="margin-bottom: 5px; color: var(--text-muted);">게임: <span id="lobby-game-type" style="color: white; float: right;"></span></p>
+                    <p style="margin-bottom: 5px; color: var(--text-muted);">초기 크레딧: <span id="lobby-credits" style="color: white; float: right;"></span></p>
+                    <p style="margin-bottom: 15px; color: var(--text-muted);">참가 인원: <span id="lobby-players" style="color: white; float: right;"></span></p>
+                    <h4 style="color: var(--accent-blue); margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;">접속 중인 플레이어</h4>
+                    <ul id="lobby-player-list" style="list-style-type: none; padding: 0; color: white; margin: 0;">
+                        <!-- Players will be added here -->
+                    </ul>
+                </div>
+
+                <p style="color: var(--accent-pink); margin-bottom: 20px; font-style: italic;">현재 멀티플레이어 서버 기능은 백엔드 연동 전 데모 모드입니다.</p>
+
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="hideMultiPanels()" style="flex: 1;">방 나가기</button>
+                    <button class="btn btn-primary disabled" style="flex: 1; cursor: not-allowed; opacity: 0.5;">게임 시작</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- VIDEO POKER -->
+    <div id="video-poker" class="game-container hidden">
+        <header>
+            <div class="header-left">
+                <button class="btn btn-back" onclick="openMenu()">← 메뉴</button>
+                <h1>비디오 포커</h1>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <span class="label">크레딧</span>
+                    <span class="value" id="credits-display">1000</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">배팅</span>
+                    <span class="value" id="bet-display">1</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">상금</span>
+                    <span class="value" id="win-display">0</span>
+                </div>
+            </div>
+            <button class="btn btn-secondary rules-btn-small" onclick="openRulesModal('poker')">📖 족보</button>
+        </header>
+
+        <main>
+            <div class="payout-table-container">
+                <table class="payout-table" id="payout-table">
+                    <!-- Payouts will be generated by JS -->
+                </table>
+            </div>
+
+            <div class="message-banner" id="message-banner">
+                <span id="game-message">배팅 금액을 선택하세요</span>
+            </div>
+
+            <div class="cards-area" id="cards-area">
+                <!-- Cards will be generated here -->
+                <div class="card-slot" id="slot-0"><div class="card empty"></div></div>
+                <div class="card-slot" id="slot-1"><div class="card empty"></div></div>
+                <div class="card-slot" id="slot-2"><div class="card empty"></div></div>
+                <div class="card-slot" id="slot-3"><div class="card empty"></div></div>
+                <div class="card-slot" id="slot-4"><div class="card empty"></div></div>
+            </div>
+
+            <div class="controls">
+                <div class="bet-controls">
+                    <button class="btn btn-secondary" id="btn-bet-min">배팅 1</button>
+                    <button class="btn btn-secondary" id="btn-bet-max">최대 배팅</button>
+                </div>
+                <button class="btn btn-primary" id="btn-deal">시작 (DEAL)</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- BLACKJACK -->
+    <div id="blackjack" class="game-container hidden">
+        <header>
+            <div class="header-left">
+                <button class="btn btn-back" onclick="openMenu()">← 메뉴</button>
+                <h1>블랙잭</h1>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <span class="label">크레딧</span>
+                    <span class="value" id="bj-credits-display">1000</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">배팅</span>
+                    <span class="value" id="bj-bet-display">10</span>
+                </div>
+            </div>
+            <button class="btn btn-secondary rules-btn-small" onclick="openRulesModal('blackjack')">📖 규칙</button>
+        </header>
+
+        <main class="bj-main">
+            <div class="bj-area dealer-area">
+                <div class="area-header">
+                    <h2>딜러 (DEALER)</h2>
+                    <span class="score-badge" id="bj-dealer-score">?</span>
+                </div>
+                <div class="cards-area" id="bj-dealer-cards">
+                    <!-- Dealer cards -->
+                </div>
+            </div>
+
+            <div class="message-banner" id="bj-message-banner">
+                <span id="bj-game-message">배팅을 시작하세요</span>
+            </div>
+
+            <div class="bj-area player-area">
+                <div class="area-header">
+                    <h2>플레이어 (PLAYER)</h2>
+                    <span class="score-badge" id="bj-player-score">0</span>
+                </div>
+                <div class="cards-area" id="bj-player-cards">
+                    <!-- Player cards -->
+                </div>
+            </div>
+
+            <div class="controls bj-controls">
+                <div class="bet-controls" id="bj-bet-controls">
+                    <button class="btn btn-secondary" id="btn-bj-bet-minus">-10</button>
+                    <button class="btn btn-secondary" id="btn-bj-bet-plus">+10</button>
+                </div>
+                <div class="action-controls hidden" id="bj-action-controls">
+                    <button class="btn btn-secondary" id="btn-bj-hit">히트 (HIT)</button>
+                    <button class="btn btn-primary" id="btn-bj-stand">스탠드 (STAND)</button>
+                </div>
+                <button class="btn btn-primary" id="btn-bj-deal">시작 (DEAL)</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- GO-STOP -->
+    <div id="gostop" class="game-container hidden">
+        <header>
+            <div class="header-left">
+                <button class="btn btn-back" onclick="openMenu()">← 메뉴</button>
+                <h1>고스톱</h1>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <span class="label">컴퓨터 점수</span>
+                    <span class="value" id="gs-com-score">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">플레이어 점수</span>
+                    <span class="value" id="gs-player-score">0</span>
+                </div>
+            </div>
+            <button class="btn btn-secondary rules-btn-small" onclick="openRulesModal('gostop')">📖 규칙</button>
+        </header>
+
+        <main class="gs-main">
+            <!-- Computer Area -->
+            <div class="gs-area gs-com-area">
+                <div class="gs-collected" id="gs-com-collected">
+                    <!-- Com collected cards grouped by Kwang, Yul, Dan, Pi -->
+                    <div class="gs-col-group" id="com-kwang"></div>
+                    <div class="gs-col-group" id="com-yul"></div>
+                    <div class="gs-col-group" id="com-dan"></div>
+                    <div class="gs-col-group" id="com-pi"></div>
+                </div>
+                <div class="gs-hand hidden-hand" id="gs-com-hand">
+                    <!-- Com hand (hidden backs) -->
+                </div>
+            </div>
+
+            <!-- Board Area -->
+            <div class="gs-board-area">
+                <div class="gs-deck" id="gs-deck">
+                    <div class="gs-card back"></div>
+                    <div id="gs-deck-count">20</div>
+                </div>
+                <div class="gs-board-cards" id="gs-board">
+                    <!-- Board cards -->
+                </div>
+            </div>
+
+            <!-- Message Area -->
+            <div class="message-banner" id="gs-message-banner">
+                <span id="gs-game-message">게임 시작을 누르세요</span>
+            </div>
+
+            <!-- Player Area -->
+            <div class="gs-area gs-player-area">
+                <div class="gs-hand" id="gs-player-hand">
+                    <!-- Player hand -->
+                </div>
+                <div class="gs-collected" id="gs-player-collected">
+                    <div class="gs-col-group" id="player-kwang"></div>
+                    <div class="gs-col-group" id="player-yul"></div>
+                    <div class="gs-col-group" id="player-dan"></div>
+                    <div class="gs-col-group" id="player-pi"></div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls gs-controls">
+                <div id="gs-action-panel" class="hidden">
+                    <button class="btn btn-primary" id="btn-gs-go">고 (GO!)</button>
+                    <button class="btn btn-secondary" id="btn-gs-stop">스톱 (STOP)</button>
+                </div>
+                <button class="btn btn-primary" id="btn-gs-start">게임 시작</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- SEOTDA -->
+    <div id="seotda" class="game-container hidden">
+        <header>
+            <div class="header-left">
+                <button class="btn btn-back" onclick="openMenu()">← 메뉴</button>
+                <h1 id="sd-game-title">섯다</h1>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <span class="label">크레딧</span>
+                    <span class="value" id="sd-credits-display">1000</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">배팅</span>
+                    <span class="value" id="sd-bet-display">50</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">판돈</span>
+                    <span class="value" id="sd-pot-display">0</span>
+                </div>
+            </div>
+            <button class="btn btn-secondary rules-btn-small" onclick="openRulesModal('seotda')">📖 족보</button>
+        </header>
+
+        <main class="sd-main">
+            <div class="bj-area dealer-area">
+                <div class="area-header">
+                    <h2>상대 (AI)</h2>
+                    <span class="score-badge" id="sd-com-score">?</span>
+                </div>
+                <div class="cards-area sd-cards" id="sd-com-cards">
+                    <!-- Com cards -->
+                </div>
+            </div>
+
+            <div class="message-banner" id="sd-message-banner">
+                <span id="sd-game-message">배팅 금액을 선택하세요</span>
+            </div>
+
+            <div class="bj-area player-area">
+                <div class="area-header">
+                    <h2>플레이어 (PLAYER)</h2>
+                    <span class="score-badge" id="sd-player-score">준비</span>
+                </div>
+                <div class="cards-area sd-cards" id="sd-player-cards">
+                    <!-- Player cards -->
+                </div>
+            </div>
+
+            <div class="controls bj-controls">
+                <div class="bet-controls" id="sd-bet-controls">
+                    <button class="btn btn-secondary" id="btn-sd-bet-minus">-50</button>
+                    <button class="btn btn-secondary" id="btn-sd-bet-plus">+50</button>
+                </div>
+                <div class="action-controls hidden" id="sd-action-controls">
+                    <button class="btn btn-secondary" id="btn-sd-die">다이 (DIE)</button>
+                    <button class="btn btn-primary" id="btn-sd-call">콜 (CALL)</button>
+                    <button class="btn btn-primary" id="btn-sd-half" style="background: linear-gradient(90deg, #ff0055, #ffd700);">하프 (HALF)</button>
+                </div>
+                <button class="btn btn-primary" id="btn-sd-deal">시작 (DEAL)</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- TEXAS HOLD'EM -->
+    <div id="holdem" class="game-container hidden">
+        <header>
+            <div class="header-left">
+                <button class="btn btn-back" onclick="openMenu()">← 메뉴</button>
+                <h1>텍사스 홀덤</h1>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <span class="label">크레딧</span>
+                    <span class="value" id="th-credits-display">1000</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">판돈</span>
+                    <span class="value" id="th-pot-display">0</span>
+                </div>
+            </div>
+            <button class="btn btn-secondary rules-btn-small" onclick="openRulesModal('poker')">📖 족보</button>
+        </header>
+
+        <main class="th-main">
+            <!-- Opponent Area -->
+            <div class="th-area dealer-area">
+                <div class="area-header">
+                    <h2>상대 (AI) - <span id="th-com-action" style="color: var(--accent-pink);"></span></h2>
+                    <span class="score-badge" id="th-com-score">?</span>
+                </div>
+                <div class="cards-area th-cards" id="th-com-cards">
+                    <!-- Com hole cards -->
+                </div>
+            </div>
+
+            <!-- Community Cards -->
+            <div class="th-board-area" id="th-board-area">
+                <div class="card-slot" id="th-board-0"><div class="card empty"></div></div>
+                <div class="card-slot" id="th-board-1"><div class="card empty"></div></div>
+                <div class="card-slot" id="th-board-2"><div class="card empty"></div></div>
+                <div class="card-slot" id="th-board-3"><div class="card empty"></div></div>
+                <div class="card-slot" id="th-board-4"><div class="card empty"></div></div>
+            </div>
+
+            <!-- Message Banner -->
+            <div class="message-banner" id="th-message-banner">
+                <span id="th-game-message">시작을 눌러주세요 (기본금 10)</span>
+            </div>
+
+            <!-- Player Area -->
+            <div class="th-area player-area">
+                <div class="area-header">
+                    <h2>플레이어 (PLAYER)</h2>
+                    <span class="score-badge" id="th-player-score">준비</span>
+                </div>
+                <div class="cards-area th-cards" id="th-player-cards">
+                    <!-- Player hole cards -->
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls bj-controls">
+                <div class="bet-controls th-bet-controls" id="th-bet-controls">
+                    <button class="btn btn-secondary" id="btn-th-raise-minus">-50</button>
+                    <span id="th-raise-amount" class="raise-amount">50</span>
+                    <button class="btn btn-secondary" id="btn-th-raise-plus">+50</button>
+                </div>
+                <div class="action-controls hidden" id="th-action-controls">
+                    <button class="btn btn-secondary" id="btn-th-fold">폴드 (FOLD)</button>
+                    <button class="btn btn-primary" id="btn-th-check-call">체크 / 콜 (CHECK/CALL)</button>
+                    <button class="btn btn-primary" id="btn-th-raise" style="background: linear-gradient(90deg, #ff0055, #ffd700);">레이즈 (RAISE)</button>
+                </div>
+                <button class="btn btn-primary" id="btn-th-deal">시작 (DEAL)</button>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
