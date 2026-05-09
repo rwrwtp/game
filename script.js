@@ -1941,24 +1941,34 @@ function createRoom() {
     
     console.log("Creating room...", roomCode);
     
+    // 1. Create the room metadata first
     roomRef.set({
         gameType,
         credits,
         maxPlayers,
-        createdAt: firebase.database.ServerValue.TIMESTAMP
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
+        status: 'LOBBY'
     }).then(() => {
+        // 2. Add the host player
         myPlayerRef = roomRef.child('players').push();
+        const hostId = myPlayerRef.key;
+        
         myPlayerRef.set({
             nickname,
             isHost: true
         }).then(() => {
+            // 3. Update the room's hostId
+            roomRef.update({
+                hostId: hostId
+            });
+            
             document.getElementById('multi-create-panel').classList.add('hidden');
             document.getElementById('multi-lobby-panel').classList.remove('hidden');
             setupRoomListener(roomCode);
         });
     }).catch(error => {
         console.error("Firebase Error:", error);
-        alert("방 생성 실패: " + error.message + "\n(데이터베이스 규칙이 '테스트 모드'인지 확인해 주세요)");
+        alert("방 생성 실패: " + error.message);
     });
 }
 
