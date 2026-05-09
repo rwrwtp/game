@@ -1741,6 +1741,31 @@ function getGroupVal(sorted, count) {
     return 0;
 }
 
+function openMode(mode) {
+    document.getElementById('main-menu').classList.add('hidden');
+    if (mode === 'single') {
+        document.getElementById('game-menu').classList.remove('hidden');
+    } else if (mode === 'multi') {
+        document.getElementById('multi-menu').classList.remove('hidden');
+    }
+}
+
+function openMainMenu() {
+    document.querySelectorAll('.menu-container, .game-container').forEach(el => el.classList.add('hidden'));
+    document.getElementById('main-menu').classList.remove('hidden');
+}
+
+function openMenu() {
+    // Back to game selection (single player)
+    document.querySelectorAll('.game-container').forEach(el => el.classList.add('hidden'));
+    document.getElementById('game-menu').classList.remove('hidden');
+}
+
+function openGame(gameId) {
+    document.getElementById('game-menu').classList.add('hidden');
+    document.getElementById(gameId).classList.remove('hidden');
+}
+
 // RULES MODAL LOGIC
 function openRulesModal(gameType) {
     document.querySelectorAll('.rules-section').forEach(sec => {
