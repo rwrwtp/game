@@ -1768,7 +1768,7 @@ const firebaseConfig = {
     messagingSenderId: "671149285789",
     appId: "1:671149285789:web:f686bc284d643c93d60f74",
     measurementId: "G-HZQBMXKKXT",
-    databaseURL: "https://game-53f85-default-rtdb.firebaseio.com/" // Default RTDB URL
+    databaseURL: "https://game-53f85-default-rtdb.asia-southeast1.firebasedatabase.app/" 
 };
 
 // Initialize Firebase
