@@ -1875,6 +1875,8 @@ function createRoom() {
     currentRoomCode = roomCode;
     const roomRef = db.ref('rooms/' + roomCode);
     
+    console.log("Creating room...", roomCode);
+    
     roomRef.set({
         gameType,
         credits,
@@ -1885,11 +1887,14 @@ function createRoom() {
         myPlayerRef.set({
             nickname,
             isHost: true
+        }).then(() => {
+            document.getElementById('multi-create-panel').classList.add('hidden');
+            document.getElementById('multi-lobby-panel').classList.remove('hidden');
+            setupRoomListener(roomCode);
         });
-        
-        document.getElementById('multi-create-panel').classList.add('hidden');
-        document.getElementById('multi-lobby-panel').classList.remove('hidden');
-        setupRoomListener(roomCode);
+    }).catch(error => {
+        console.error("Firebase Error:", error);
+        alert("방 생성 실패: " + error.message + "\n(데이터베이스 규칙이 '테스트 모드'인지 확인해 주세요)");
     });
 }
 
@@ -1920,11 +1925,15 @@ function joinRoom() {
         myPlayerRef.set({
             nickname,
             isHost: false
+        }).then(() => {
+            document.getElementById('multi-join-panel').classList.add('hidden');
+            document.getElementById('multi-lobby-panel').classList.remove('hidden');
+            setupRoomListener(roomCode);
+        }).catch(error => {
+            alert("참가 실패: " + error.message);
         });
-
-        document.getElementById('multi-join-panel').classList.add('hidden');
-        document.getElementById('multi-lobby-panel').classList.remove('hidden');
-        setupRoomListener(roomCode);
+    }).catch(error => {
+        alert("데이터 불러오기 실패: " + error.message);
     });
 }
 
