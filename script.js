@@ -1834,6 +1834,45 @@ function setupRoomListener(roomCode) {
         }
         
         updateLobbyPlayers(players, roomData.maxPlayers);
+
+        // Check if game has started
+        if (roomData.status === 'STARTING') {
+            document.getElementById('multi-menu').classList.add('hidden');
+            openGame(roomData.gameType === 'seotda3' ? 'seotda' : roomData.gameType);
+            // In a real app, we would sync credits and seats here
+        }
+
+        // Only host can click start, others see it disabled or hidden
+        const startBtn = document.getElementById('btn-lobby-start');
+        if (roomData.hostId !== myPlayerRef.key) {
+            startBtn.style.opacity = '0.5';
+            startBtn.style.pointerEvents = 'none';
+            startBtn.textContent = '호스트 대기 중...';
+        } else {
+            startBtn.style.opacity = '1';
+            startBtn.style.pointerEvents = 'all';
+            startBtn.textContent = '게임 시작';
+        }
+    });
+}
+
+function startMultiGame() {
+    if (!currentRoomCode) return;
+    
+    db.ref('rooms/' + currentRoomCode).once('value', snapshot => {
+        const roomData = snapshot.val();
+        if (roomData && roomData.hostId === myPlayerRef.key) {
+            // Check if at least 2 players
+            const playerCount = roomData.players ? Object.keys(roomData.players).length : 0;
+            if (playerCount < 2) {
+                if(!confirm("혼자서 시작하시겠습니까? (테스트용)")) return;
+            }
+
+            db.ref('rooms/' + currentRoomCode).update({
+                status: 'STARTING',
+                startTime: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
     });
 }
 
